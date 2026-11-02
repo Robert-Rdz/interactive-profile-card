@@ -2,7 +2,7 @@
 // Start point: the solution of Task 1 + the new data. Follow the steps in README.md.
 // TODO: add the imports you need in each step (Pressable, Button, Alert, TextInput, useState...)
 import { useState } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet, Platform, Pressable, Button, Alert } from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet, Platform, Pressable, Button, Alert, TextInput } from 'react-native';
 
 const COLORS = {
   background: '#EEF1F6',
@@ -22,6 +22,7 @@ const BIO =
 const SKILLS = ['React Native', 'JavaScript', 'UI Design', 'Git', 'Flexbox'];
 const BASE_FOLLOWERS = 1200;
 // TODO STEP 4: const MAX_MESSAGE = 140;
+const MAX_MESSAGE = 140;
 
 // Adds thousands separators: 1200 -> '1,200'
 function formatCount(n) {
@@ -31,7 +32,11 @@ function formatCount(n) {
 export default function App() {
   // STEP 3: followers must grow by 1 while you are following
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [message, setMessage] = useState('');
+
   const followers = BASE_FOLLOWERS + (isFollowing ? 1 : 0);
+  const isSendDisabled = message.trim().length === 0;
   const stats = [
     { label: 'Projects', value: '24' },
     { label: 'Followers', value: formatCount(followers) },
@@ -44,7 +49,12 @@ export default function App() {
   }
 
   function handleMessagePress() {
-    Alert.alert('Message', 'You pressed Message');
+    setIsComposerOpen(!isComposerOpen);
+  }
+  function handleSendPress() {
+    Alert.alert('Message sent', message);
+    setMessage('');
+    setIsComposerOpen(false);
   }
 
   function handleSharePress() {
@@ -116,11 +126,33 @@ export default function App() {
               </Text>
             </Pressable>
             <Pressable style={({ pressed }) => [styles.button, pressed && styles.pressed]} onPress={handleMessagePress}>
-              <Text style={styles.buttonText}>Message</Text>
+              <Text style={styles.buttonText}>{isComposerOpen ? 'Close' : 'Message'}</Text>
             </Pressable>
           </View>
 
           {/* TODO STEP 4: when 'Message' is pressed, show a composer here (TextInput + counter + Send) */}
+          {isComposerOpen && (
+            <View style={styles.composer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Type your message..."
+                placeholderTextColor={COLORS.muted}
+                value={message}
+                onChangeText={(newText) => setMessage(newText)}
+                maxLength={MAX_MESSAGE}
+              />
+              <View style={styles.composerFooter}>
+                <Text style={styles.counter}>{message.length}/{MAX_MESSAGE} characters</Text>
+                <Pressable
+                  style={({ pressed }) => [styles.sendButton, isSendDisabled && styles.sendButtonDisabled, pressed && styles.pressed]}
+                  onPress={handleSendPress}
+                  disabled={isSendDisabled}
+                >
+                  <Text style={styles.sendText}>Send</Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
 
           {/* TODO STEP 1: add a 'Share profile' Button (core component) here */}
           <View style={styles.shareWrapper}>
